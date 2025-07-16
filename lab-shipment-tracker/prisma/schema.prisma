@@ -9,12 +9,12 @@ generator client {
 
 model Shipment {
   id                  String   @id @default(uuid())
-  trackingNumber      String
+  tracking_number      String
   carrier             String
   status              String
-  expectedDelivery    DateTime?
-  sampleType          String?
+  expected_delivery_date    DateTime?
+  sample_type          String?
   priority            String?
-  dateCreated         DateTime @default(now())
-  dateReceived        DateTime?
+  date_created         DateTime @default(now())
+  date_received        DateTime?
 }

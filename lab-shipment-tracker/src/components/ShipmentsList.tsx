@@ -2,13 +2,13 @@
 
 type Shipment = {
   id: string;
-  trackingnumber: string;
+  tracking_number: string;
   carrier: string;
   status: string;
-  sampletype: string | null;
+  sample_type: string | null;
   priority: string | null;
-  expecteddelivery: string | null;
-  datereceived: string | null;
+  expected_delivery_date: string | null;
+  date_received: string | null;
 };
 
 type Props = {
@@ -56,23 +56,23 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
         <tbody>
           {shipments.map((s) => (
             <tr key={s.id} className="border-t text-gray-900">
-              <td className="p-2 border">{s.trackingnumber}</td>
+              <td className="p-2 border">{s.tracking_number}</td>
               <td className="p-2 border">
                 <span className={`px-2 py-1 rounded text-sm ${getStatusColor(s.status)}`}>
                   {s.status}
                 </span>
               </td>
               <td className="p-2 border">{s.carrier}</td>
-              <td className="p-2 border">{s.sampletype || '—'}</td>
+              <td className="p-2 border">{s.sample_type || '—'}</td>
               <td className="p-2 border">{s.priority || '—'}</td>
               <td className="p-2 border">
-                {s.expecteddelivery ? new Date(s.expecteddelivery).toLocaleString() : '—'}
+                {s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleString() : '—'}
               </td>
               <td className="p-2 border">
-                {s.datereceived ? new Date(s.datereceived).toLocaleString() : '—'}
+                {s.date_received ? new Date(s.date_received).toLocaleString() : '—'}
               </td>
               <td className="p-2 border">
-                {s.datereceived ? (
+                {s.date_received ? (
                   <span className="text-green-600 font-semibold">✓ Received</span>
                 ) : (
                   <button

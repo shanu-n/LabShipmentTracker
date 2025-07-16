@@ -4,7 +4,7 @@ export async function GET() {
   const { data, error } = await supabase
     .from('shipments')
     .select('*')
-    .order('datecreated', { ascending: false }); // ✅ lowercase
+    .order('date_created', { ascending: false }); // ✅ lowercase
 
   if (error) {
     console.error('❌ GET error:', error.message);
@@ -19,10 +19,10 @@ export async function POST(req: Request) {
 
   const { data, error } = await supabase.from('shipments').insert([
     {
-      trackingnumber: body.trackingNumber,     // ✅ lowercase key
+      tracking_number: body.tracking_number,     // ✅ lowercase key
       carrier: body.carrier,
       status: 'In Transit',
-      sampletype: body.sampleType,             // ✅ lowercase key
+      sample_type: body.sample_type,             // ✅ lowercase key
       priority: body.priority,
     },
   ]);

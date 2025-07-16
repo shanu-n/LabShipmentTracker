@@ -7,14 +7,14 @@ import ShipmentsList from '../components/ShipmentsList';
 // Type matching your Supabase table structure
 type Shipment = {
   id: string;
-  trackingnumber: string;
+  tracking_number: string;
   carrier: string;
   status: string;
-  expecteddelivery: string | null;
-  sampletype: string | null;
+  expected_delivery_date: string | null;
+  sample_type: string | null;
   priority: string | null;
-  datecreated: string;
-  datereceived: string | null;
+  date_created: string;
+  date_received: string | null;
 };
 
 export default function Home() {
