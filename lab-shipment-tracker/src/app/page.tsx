@@ -1,35 +1,43 @@
-import { supabase } from './lib/supabaseClient'
+'use client';
 
-export default async function Home() {
-  const { data, error } = await supabase.from('shipments').select('*')
-  
-  // Debug logging
-  console.log('Data:', data)
-  console.log('Error:', error)
-  console.log('Data length:', data?.length)
-  
-  if (error) {
-    console.error('Error fetching data:', error)
-    return <div>Error loading data: {error.message}</div>
-  }
+import { useEffect, useState } from 'react';
+import AddShipmentForm from '../components/AddShipmentForm';
+import ShipmentsList from '../components/ShipmentsList';
 
-  if (!data || data.length === 0) {
-    return <div>No shipments found</div>
-  }
+// Type matching your Supabase table structure
+type Shipment = {
+  id: string;
+  trackingnumber: string;
+  carrier: string;
+  status: string;
+  expecteddelivery: string | null;
+  sampletype: string | null;
+  priority: string | null;
+  datecreated: string;
+  datereceived: string | null;
+};
+
+export default function Home() {
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+
+  const fetchShipments = async () => {
+    try {
+      const res = await fetch('/api/shipments');
+      const data = await res.json();
+      setShipments(data.shipments || []);
+    } catch (err) {
+      console.error('Failed to fetch shipments:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchShipments();
+  }, []);
 
   return (
-    <div>
-      <h1>Lab Shipment Tracker</h1>
-      <p>Found {data.length} shipments</p>
-      {data?.map(shipment => (
-        <div key={shipment.id} style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
-          <p>Tracking: {shipment.tracking_number}</p>
-          <p>Carrier: {shipment.carrier}</p>
-          <p>Status: {shipment.status}</p>
-          <p>Sample Type: {shipment.sample_type}</p>
-          <p>Priority: {shipment.priority}</p>
-        </div>
-      ))}
-    </div>
-  )
+    <main className="min-h-screen bg-gray-100 py-10">
+      <AddShipmentForm onAdd={fetchShipments} />
+      <ShipmentsList shipments={shipments} onMarkAsReceived={fetchShipments} />
+    </main>
+  );
 }
