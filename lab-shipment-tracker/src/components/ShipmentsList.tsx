@@ -1,6 +1,5 @@
 'use client';
-
-import React from 'react';
+import { useState } from 'react';
 
 type Shipment = {
   id: string;
@@ -19,6 +18,11 @@ type Props = {
 };
 
 export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
+  const [showReceived, setShowReceived] = useState(false);
+
+  const activeShipments = shipments.filter((s) => !s.date_received);
+  const receivedShipments = shipments.filter((s) => s.date_received);
+
   const markAsReceived = async (id: string) => {
     await fetch(`/api/shipments/${id}`, {
       method: 'PATCH',
@@ -56,7 +60,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           </tr>
         </thead>
         <tbody>
-          {shipments.map((s) => (
+          {activeShipments.map((s) => (
             <tr key={s.id} className="border-t text-gray-900">
               <td className="p-2 border">{s.tracking_number}</td>
               <td className="p-2 border">
@@ -93,6 +97,38 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           ))}
         </tbody>
       </table>
+      <button
+        onClick={() => setShowReceived((prev) => !prev)}
+        className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+      >
+        {showReceived ? 'Hide Received Shipments' : 'Show Received Shipments'}
+      </button>
+
+      {showReceived && (
+        <div className="mt-6 bg-gray-50 p-4 rounded shadow">
+          <h3 className="text-md font-semibold mb-3 text-gray-800">Received Shipments</h3>
+          <table className="min-w-full table-auto border text-sm">
+            <thead>
+              <tr className="bg-gray-200 text-left text-gray-800">
+                <th className="p-2 border">Tracking Number</th>
+                <th className="p-2 border">Carrier</th>
+                <th className="p-2 border">Sample Type</th>
+                <th className="p-2 border">Date Received</th>
+              </tr>
+            </thead>
+            <tbody>
+              {receivedShipments.map((s) => (
+                <tr key={s.id} className="border-t text-gray-900">
+                  <td className="p-2 border">{s.tracking_number}</td>
+                  <td className="p-2 border">{s.carrier}</td>
+                  <td className="p-2 border">{s.sample_type || '—'}</td>
+                  <td className="p-2 border">{new Date(s.date_received!).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

@@ -112,8 +112,11 @@ export default function AddShipmentForm({ onAdd }: Props) {
         disabled={isSubmitting}
         className="border p-2 w-full rounded text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
       >
-        <option value="Inventory">Inventory</option>
-        <option value="Clinical">Clinical</option>
+        <option value="ChemLab Inventory">ChemLab Inventory</option>
+        <option value="BioLab Inventory">BioLab Inventory</option>
+        <option value="Office Inventory">Office Inventory</option>
+        <option value="Food/Misc">Food/Misc</option>
+        <option value="Sample">Sample</option>
       </select>
 
       <select
