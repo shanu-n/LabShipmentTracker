@@ -9,7 +9,7 @@ export default function AddShipmentForm({ onAdd }: Props) {
   const [form, setForm] = useState({
     tracking_number: '',
     carrier: 'FedEx',
-    sample_type: '',
+    sample_type: 'Sample',
     priority: 'Medium',
   });
 
@@ -48,7 +48,7 @@ export default function AddShipmentForm({ onAdd }: Props) {
       setForm({
         tracking_number: '',
         carrier: 'FedEx',
-        sample_type: '',
+        sample_type: 'Sample',
         priority: 'Medium',
       });
 
@@ -105,14 +105,16 @@ export default function AddShipmentForm({ onAdd }: Props) {
         <option value="DHL">DHL</option>
       </select>
 
-      <input
+      <select
         name="sample_type"
-        placeholder="Sample Type"
         value={form.sample_type}
         onChange={handleChange}
         disabled={isSubmitting}
-        className="border p-2 w-full rounded text-black placeholder-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-      />
+        className="border p-2 w-full rounded text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
+      >
+        <option value="Inventory">Inventory</option>
+        <option value="Clinical">Clinical</option>
+      </select>
 
       <select
         name="priority"
