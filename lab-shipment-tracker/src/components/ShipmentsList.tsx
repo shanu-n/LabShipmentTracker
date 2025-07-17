@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 type Shipment = {
   id: string;
   tracking_number: string;
@@ -21,7 +23,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
     await fetch(`/api/shipments/${id}`, {
       method: 'PATCH',
     });
-    onMarkAsReceived();
+    onMarkAsReceived(); // refresh list
   };
 
   const getStatusColor = (status: string) => {
@@ -66,10 +68,14 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
               <td className="p-2 border">{s.sample_type || '—'}</td>
               <td className="p-2 border">{s.priority || '—'}</td>
               <td className="p-2 border">
-                {s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleString() : '—'}
+                {s.expected_delivery_date
+                  ? new Date(s.expected_delivery_date).toLocaleString()
+                  : '—'}
               </td>
               <td className="p-2 border">
-                {s.date_received ? new Date(s.date_received).toLocaleString() : '—'}
+                {s.date_received
+                  ? new Date(s.date_received).toLocaleString()
+                  : '—'}
               </td>
               <td className="p-2 border">
                 {s.date_received ? (
