@@ -52,7 +52,8 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
             <th className="p-2 border">Tracking Number</th>
             <th className="p-2 border">Status</th>
             <th className="p-2 border">Carrier</th>
-            <th className="p-2 border">Sample Type</th>
+            <th className="p-2 border">Shipment Type</th>
+              {/* // ✅ Changed to "Shipment Type" from Sample Type */}
             <th className="p-2 border">Priority</th>
             <th className="p-2 border">Expected Delivery</th>
             <th className="p-2 border">Date Received</th>
@@ -99,20 +100,21 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
       </table>
       <button
         onClick={() => setShowReceived((prev) => !prev)}
-        className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+        className="mt-4 mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
       >
         {showReceived ? 'Hide Received Shipments' : 'Show Received Shipments'}
       </button>
 
       {showReceived && (
-        <div className="mt-6 bg-gray-50 p-4 rounded shadow">
+        <div className="mt-1 bg-gray-50 p-4 rounded shadow">
           <h3 className="text-md font-semibold mb-3 text-gray-800">Received Shipments</h3>
           <table className="min-w-full table-auto border text-sm">
             <thead>
               <tr className="bg-gray-200 text-left text-gray-800">
                 <th className="p-2 border">Tracking Number</th>
                 <th className="p-2 border">Carrier</th>
-                <th className="p-2 border">Sample Type</th>
+                <th className="p-2 border">Shipment Type</th> 
+                  {/* // ✅ Changed to "Shipment Type" from Sample Type */}
                 <th className="p-2 border">Date Received</th>
               </tr>
             </thead>
