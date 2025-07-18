@@ -21,7 +21,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
   const [showReceived, setShowReceived] = useState(false);
   const [activePage, setActivePage] = useState(1);
   const [receivedPage, setReceivedPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 1;
 
   const activeShipments = shipments.filter((s) => !s.date_received);
   const receivedShipments = shipments.filter((s) => s.date_received);
@@ -68,6 +68,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
       const totalPages = Math.ceil(total / itemsPerPage);
       const startIndex = (currentPage - 1) * itemsPerPage;
       const endIndex = Math.min(startIndex + itemsPerPage, total);
+      const hasResults = total > 0;
 
       return (
         <div className="mt-4 flex items-center justify-between px-4">
@@ -77,9 +78,9 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           <div className="flex space-x-2">
             <button
               onClick={() => setPage(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
+              disabled={currentPage === 1 || !hasResults}
               className={`px-3 py-1 rounded border transition-colors
-                ${currentPage === 1 
+                ${currentPage === 1 || !hasResults
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                   : 'bg-blue-800 text-white hover:bg-blue-700'
                 }`}
@@ -88,9 +89,9 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
             </button>
             <button
               onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || !hasResults}
               className={`px-3 py-1 rounded border transition-colors
-                ${currentPage === totalPages 
+                ${currentPage === totalPages || !hasResults
                   ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                   : 'bg-blue-800 text-white hover:bg-blue-700'
                 }`}
