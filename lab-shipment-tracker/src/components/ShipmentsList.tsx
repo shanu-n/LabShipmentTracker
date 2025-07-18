@@ -1,6 +1,5 @@
 'use client';
-
-import React from 'react';
+import { useState } from 'react';
 
 type Shipment = {
   id: string;
@@ -19,11 +18,29 @@ type Props = {
 };
 
 export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
+  const [showReceived, setShowReceived] = useState(false);
+  const [activePage, setActivePage] = useState(1);
+  const [receivedPage, setReceivedPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const activeShipments = shipments.filter((s) => !s.date_received);
+  const receivedShipments = shipments.filter((s) => s.date_received);
+
+  // Pagination calculations
+  const paginateItems = (items: Shipment[], pageNumber: number) => {
+    const startIndex = (pageNumber - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return items.slice(startIndex, endIndex);
+  };
+
+  const currentActiveShipments = paginateItems(activeShipments, activePage);
+  const currentReceivedShipments = paginateItems(receivedShipments, receivedPage);
+
   const markAsReceived = async (id: string) => {
     await fetch(`/api/shipments/${id}`, {
       method: 'PATCH',
     });
-    onMarkAsReceived(); // refresh list
+    onMarkAsReceived();
   };
 
   const getStatusColor = (status: string) => {
@@ -39,6 +56,53 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
     }
   };
 
+  const PaginationControls = ({ 
+      total, 
+      currentPage, 
+      setPage 
+    }: { 
+      total: number; 
+      currentPage: number; 
+      setPage: (page: number) => void; 
+    }) => {
+      const totalPages = Math.ceil(total / itemsPerPage);
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = Math.min(startIndex + itemsPerPage, total);
+      const hasResults = total > 0;
+
+      return (
+        <div className="mt-4 flex items-center justify-between px-4">
+          <div className="text-sm text-gray-700">
+            Showing {total > 0 ? startIndex + 1 : 0}-{endIndex} of {total} results
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1 || !hasResults}
+              className={`px-3 py-1 rounded border transition-colors
+                ${currentPage === 1 || !hasResults
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-800 text-white hover:bg-blue-700'
+                }`}
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages || !hasResults}
+              className={`px-3 py-1 rounded border transition-colors
+                ${currentPage === totalPages || !hasResults
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-800 text-white hover:bg-blue-700'
+                }`}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      );
+    };
+
   return (
     <div className="mt-10 max-w-7xl mx-auto p-4 bg-white rounded shadow">
       <h2 className="text-xl font-bold mb-4 text-gray-900">Current Shipments</h2>
@@ -48,7 +112,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
             <th className="p-2 border">Tracking Number</th>
             <th className="p-2 border">Status</th>
             <th className="p-2 border">Carrier</th>
-            <th className="p-2 border">Sample Type</th>
+            <th className="p-2 border">Shipment Type</th>
             <th className="p-2 border">Priority</th>
             <th className="p-2 border">Expected Delivery</th>
             <th className="p-2 border">Date Received</th>
@@ -56,7 +120,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           </tr>
         </thead>
         <tbody>
-          {shipments.map((s) => (
+          {currentActiveShipments.map((s) => (
             <tr key={s.id} className="border-t text-gray-900">
               <td className="p-2 border">{s.tracking_number}</td>
               <td className="p-2 border">
@@ -93,6 +157,49 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           ))}
         </tbody>
       </table>
+      <PaginationControls 
+        total={activeShipments.length} 
+        currentPage={activePage} 
+        setPage={setActivePage}
+      />
+
+      <button
+        onClick={() => setShowReceived((prev) => !prev)}
+        className="mt-4 mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+      >
+        {showReceived ? 'Hide Received Shipments' : 'Show Received Shipments'}
+      </button>
+
+      {showReceived && (
+        <div className="mt-1 bg-gray-50 p-4 rounded shadow">
+          <h3 className="text-md font-semibold mb-3 text-gray-800">Received Shipments</h3>
+          <table className="min-w-full table-auto border text-sm">
+            <thead>
+              <tr className="bg-gray-200 text-left text-gray-800">
+                <th className="p-2 border">Tracking Number</th>
+                <th className="p-2 border">Carrier</th>
+                <th className="p-2 border">Shipment Type</th>
+                <th className="p-2 border">Date Received</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentReceivedShipments.map((s) => (
+                <tr key={s.id} className="border-t text-gray-900">
+                  <td className="p-2 border">{s.tracking_number}</td>
+                  <td className="p-2 border">{s.carrier}</td>
+                  <td className="p-2 border">{s.sample_type || '—'}</td>
+                  <td className="p-2 border">{new Date(s.date_received!).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <PaginationControls 
+            total={receivedShipments.length} 
+            currentPage={receivedPage} 
+            setPage={setReceivedPage}
+          />
+        </div>
+      )}
     </div>
   );
 }
