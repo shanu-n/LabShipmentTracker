@@ -21,7 +21,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
   const [showReceived, setShowReceived] = useState(false);
   const [activePage, setActivePage] = useState(1);
   const [receivedPage, setReceivedPage] = useState(1);
-  const itemsPerPage = 1;
+  const itemsPerPage = 10;
 
   const activeShipments = shipments.filter((s) => !s.date_received);
   const receivedShipments = shipments.filter((s) => s.date_received);
