@@ -18,5 +18,6 @@ export async function PATCH(_: Request, { params }: { params: { id: string } }) 
     return Response.json({ error: error.message }, { status: 500 });
   }
 
+  console.log('✅ Shipment marked as received:', data);
   return Response.json({ message: 'Shipment marked as received', shipment: data });
 }

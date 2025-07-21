@@ -22,6 +22,8 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
   const [showReceived, setShowReceived] = useState(false);
   const [activePage, setActivePage] = useState(1);
   const [receivedPage, setReceivedPage] = useState(1);
+  const [success, setSuccess] = useState<string | null>(null);
+
   const itemsPerPage = 10;
 
   const activeShipments = shipments.filter((s) => !s.date_received);
@@ -40,8 +42,13 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
     await fetch(`/api/shipments/${id}`, {
       method: 'PATCH',
     });
+    setSuccess('Shipment marked as received!');
     onMarkAsReceived();
+
+    // Auto-hide after 3 seconds
+    setTimeout(() => setSuccess(null), 3000);
   };
+
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -113,6 +120,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
         >
           {showReceived ? 'Hide Received Shipments' : 'Show Received Shipments'}
         </button>
+
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto border text-lg font-medium text-[#1c1c1e]">
@@ -130,22 +138,31 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           </thead>
           <tbody>
             <AddShipmentForm onAdd={onMarkAsReceived} />
+            {success && (
+              <tr>
+                <td colSpan={8}>
+                  <div className="my-2 mx-2 px-4 py-2 text-sm rounded bg-green-100 text-green-800 border border-green-300">
+                    {success}
+                  </div>
+                </td>
+              </tr>
+            )}
             {currentActiveShipments.map((s) => (
               <tr key={s.id} className="border-t text-gray-900">
                 <td className="p-1 border font-mono text-base">{s.tracking_number}</td>
-                <td className="p-1 border">
+                <td className="p-1 border text-center">
                   <span className={`px-3 py-1 rounded text-white text-sm ${getStatusColor(s.status)}`}>{s.status}</span>
                 </td>
-                <td className="p-1 border">{s.carrier}</td>
-                <td className="p-1 border">{s.sample_type || '—'}</td>
-                <td className="p-1 border">{s.priority || '—'}</td>
-                <td className="p-1 border">
+                <td className="px-3 py-1 border">{s.carrier}</td>
+                <td className="px-3 py-1 border">{s.sample_type || '—'}</td>
+                <td className="px-3 py-1 border">{s.priority || '—'}</td>
+                <td className="px-3 py-1 border">
                   {s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleString() : '—'}
                 </td>
-                <td className="p-1 border">
+                <td className="px-3 py-1 border">
                   {s.date_received ? new Date(s.date_received).toLocaleString() : '—'}
                 </td>
-                <td className="p-1 border">
+                <td className="px-3 py-1 border">
                   {s.date_received ? (
                     <button
                       disabled
@@ -156,7 +173,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
                   ) : (
                     <button
                       onClick={() => markAsReceived(s.id)}
-                      className="bg-[#0059c2] text-white text-sm px-3 py-1 rounded hover:bg-[#0044a8]"
+                      className="bg-[#0059c2] text-white text-sm px-6 py-1 rounded hover:bg-[#0044a8]"
                     >
                       Mark as Received
                     </button>

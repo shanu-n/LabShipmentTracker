@@ -15,6 +15,7 @@ export default function AddShipmentForm({ onAdd }: Props) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -24,11 +25,13 @@ export default function AddShipmentForm({ onAdd }: Props) {
   const handleSubmit = async () => {
     if (form.tracking_number.trim().length < 6) {
       setError('Tracking number must be at least 6 characters');
+      setSuccess(null); 
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const response = await fetch('/api/shipments', {
@@ -50,6 +53,8 @@ export default function AddShipmentForm({ onAdd }: Props) {
         priority: 'Medium',
       });
 
+      setSuccess('Shipment successfully added!');
+      setTimeout(() => setSuccess(null), 3000);
       onAdd();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -130,6 +135,14 @@ export default function AddShipmentForm({ onAdd }: Props) {
           </button>
         </td>
       </tr>
+
+      {success && (
+        <tr>
+          <td colSpan={8} className="p-3 text-sm text-green-700 bg-green-100 border border-t-0">
+            {success}
+          </td>
+        </tr>
+      )}
 
       {error && (
         <tr>
