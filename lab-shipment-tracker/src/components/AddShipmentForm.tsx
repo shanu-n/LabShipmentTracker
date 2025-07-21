@@ -15,19 +15,15 @@ export default function AddShipmentForm({ onAdd }: Props) {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    // Clear error when user starts typing
     if (error) setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
-    setSuccess(false);
 
     try {
       const response = await fetch('/api/shipments', {
@@ -41,10 +37,6 @@ export default function AddShipmentForm({ onAdd }: Props) {
         throw new Error(`Failed to add shipment: ${errorText}`);
       }
 
-      // Show success message
-      setSuccess(true);
-      
-      // Reset form
       setForm({
         tracking_number: '',
         carrier: 'FedEx',
@@ -52,12 +44,7 @@ export default function AddShipmentForm({ onAdd }: Props) {
         priority: 'Medium',
       });
 
-      // Call parent callback
       onAdd();
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -66,78 +53,75 @@ export default function AddShipmentForm({ onAdd }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-6 bg-white rounded shadow max-w-xl mx-auto mt-6">
-      <h2 className="text-xl font-bold text-center text-gray-800">Add New Shipment</h2>
-      
-      {/* Success Message */}
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-          Shipment added successfully!
-        </div>
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
-      )}
-
-      <input
-        name="tracking_number"
-        placeholder="Tracking Number"
-        value={form.tracking_number}
-        onChange={handleChange}
-        required
-        disabled={isSubmitting}
-        className="border p-2 w-full rounded text-black placeholder-gray-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-      />
-
-      <select
-        name="carrier"
-        value={form.carrier}
-        onChange={handleChange}
-        disabled={isSubmitting}
-        className="border p-2 w-full rounded text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
-      >
-        <option value="FedEx">FedEx</option>
-        <option value="UPS">UPS</option>
-        <option value="DHL">DHL</option>
-      </select>
-
-      <select
-        name="sample_type"
-        value={form.sample_type}
-        onChange={handleChange}
-        disabled={isSubmitting}
-        className="border p-2 w-full rounded text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
-      >
-        <option value="CLIA">CLIA</option>
-        <option value="Research">Research</option>
-        <option value="Office Inventory">Office Inventory</option>
-        <option value="Food/Misc">Food/Misc</option>
-        <option value="Sample">Sample</option>
-      </select>
-
-      <select
-        name="priority"
-        value={form.priority}
-        onChange={handleChange}
-        disabled={isSubmitting}
-        className="border p-2 w-full rounded text-black disabled:bg-gray-100 disabled:cursor-not-allowed"
-      >
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-      </select>
-
-      <button 
-        type="submit" 
-        disabled={isSubmitting}
-        className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded w-full font-semibold transition-colors"
-      >
-        {isSubmitting ? 'Adding Shipment...' : 'Add Shipment'}
-      </button>
-    </form>
+    <tr className="bg-white border-t">
+      <td className="p-4 border">
+        <input
+          name="tracking_number"
+          placeholder="Tracking #"
+          value={form.tracking_number}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          className="w-full p-2 border rounded"
+          required
+        />
+      </td>
+      <td className="p-4 border text-center">
+        <span className="inline-block bg-yellow-100 text-yellow-800 text-sm font-medium px-2 py-1 rounded">
+          Pending
+        </span>
+      </td>
+      <td className="p-4 border">
+        <select
+          name="carrier"
+          value={form.carrier}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          className="w-full p-2 border rounded"
+        >
+          <option value="FedEx">FedEx</option>
+          <option value="UPS">UPS</option>
+          <option value="DHL">DHL</option>
+        </select>
+      </td>
+      <td className="p-4 border">
+        <select
+          name="sample_type"
+          value={form.sample_type}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          className="w-full p-2 border rounded"
+        >
+          <option value="CLIA">CLIA</option>
+          <option value="Research">Research</option>
+          <option value="Office Inventory">Office Inventory</option>
+          <option value="Food/Misc">Food/Misc</option>
+          <option value="Sample">Sample</option>
+        </select>
+      </td>
+      <td className="p-4 border">
+        <select
+          name="priority"
+          value={form.priority}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          className="w-full p-2 border rounded"
+        >
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+      </td>
+      <td className="p-4 border text-center text-gray-400">—</td>
+      <td className="p-4 border text-center text-gray-400">—</td>
+      <td className="p-2 border text-center w-28">
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="bg-[#0059c2] text-white text-sm px-3 py-1 rounded hover:bg-[#0044a8] disabled:bg-blue-300 disabled:cursor-not-allowed"
+        >
+          {isSubmitting ? 'Adding...' : 'Add'}
+        </button>
+      </td>
+    </tr>
   );
 }
