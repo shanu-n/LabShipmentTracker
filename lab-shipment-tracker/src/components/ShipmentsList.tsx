@@ -118,34 +118,34 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
         <table className="min-w-full table-auto border text-lg font-medium text-[#1c1c1e]">
           <thead className="sticky top-0 bg-[#003366] text-white text-left text-sm uppercase tracking-wider">
             <tr>
-              <th className="p-4 border">Tracking Number</th>
-              <th className="p-4 border">Status</th>
-              <th className="p-4 border">Carrier</th>
-              <th className="p-4 border">Shipment Type</th>
-              <th className="p-4 border">Priority</th>
-              <th className="p-4 border">Expected Delivery</th>
-              <th className="p-4 border">Date Received</th>
-              <th className="p-4 border">Action</th>
+              <th className="p-1 border">Tracking Number</th>
+              <th className="p-1 border">Status</th>
+              <th className="p-1 border">Carrier</th>
+              <th className="p-1 border">Shipment Type</th>
+              <th className="p-1 border">Priority</th>
+              <th className="p-1 border">Expected Delivery</th>
+              <th className="p-1 border">Date Received</th>
+              <th className="p-1 border">Action</th>
             </tr>
           </thead>
           <tbody>
             <AddShipmentForm onAdd={onMarkAsReceived} />
             {currentActiveShipments.map((s) => (
               <tr key={s.id} className="border-t text-gray-900">
-                <td className="p-4 border font-mono text-base">{s.tracking_number}</td>
-                <td className="p-4 border">
+                <td className="p-1 border font-mono text-base">{s.tracking_number}</td>
+                <td className="p-1 border">
                   <span className={`px-3 py-1 rounded text-white text-sm ${getStatusColor(s.status)}`}>{s.status}</span>
                 </td>
-                <td className="p-4 border">{s.carrier}</td>
-                <td className="p-4 border">{s.sample_type || '—'}</td>
-                <td className="p-4 border">{s.priority || '—'}</td>
-                <td className="p-4 border">
+                <td className="p-1 border">{s.carrier}</td>
+                <td className="p-1 border">{s.sample_type || '—'}</td>
+                <td className="p-1 border">{s.priority || '—'}</td>
+                <td className="p-1 border">
                   {s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleString() : '—'}
                 </td>
-                <td className="p-4 border">
+                <td className="p-1 border">
                   {s.date_received ? new Date(s.date_received).toLocaleString() : '—'}
                 </td>
-                <td className="p-4 border">
+                <td className="p-1 border">
                   {s.date_received ? (
                     <button
                       disabled
@@ -156,7 +156,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
                   ) : (
                     <button
                       onClick={() => markAsReceived(s.id)}
-                      className="bg-[#0059c2] text-white px-4 py-2 rounded hover:bg-[#0044a8]"
+                      className="bg-[#0059c2] text-white text-sm px-3 py-1 rounded hover:bg-[#0044a8]"
                     >
                       Mark as Received
                     </button>
@@ -174,24 +174,24 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
       />
 
       {showReceived && (
-        <div className="mt-8 bg-white p-4 rounded shadow">
+        <div className="mt-8 bg-white p-1 rounded shadow">
           <h3 className="text-xl font-semibold mb-3 text-[#003366]">Received Shipments</h3>
           <table className="min-w-full table-auto border text-base text-[#1c1c1e]">
             <thead className="bg-[#dbe9f4] text-left">
               <tr>
-                <th className="p-4 border">Tracking Number</th>
-                <th className="p-4 border">Carrier</th>
-                <th className="p-4 border">Shipment Type</th>
-                <th className="p-4 border">Date Received</th>
+                <th className="p-1 border">Tracking Number</th>
+                <th className="p-1 border">Carrier</th>
+                <th className="p-1 border">Shipment Type</th>
+                <th className="p-1 border">Date Received</th>
               </tr>
             </thead>
             <tbody>
               {currentReceivedShipments.map((s) => (
                 <tr key={s.id} className="border-t">
-                  <td className="p-4 border font-mono">{s.tracking_number}</td>
-                  <td className="p-4 border">{s.carrier}</td>
-                  <td className="p-4 border">{s.sample_type || '—'}</td>
-                  <td className="p-4 border">{new Date(s.date_received!).toLocaleString()}</td>
+                  <td className="p-1 border font-mono">{s.tracking_number}</td>
+                  <td className="p-1 border">{s.carrier}</td>
+                  <td className="p-1 border">{s.sample_type || '—'}</td>
+                  <td className="p-1 border">{new Date(s.date_received!).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
