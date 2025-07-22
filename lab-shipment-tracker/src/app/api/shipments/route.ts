@@ -1,5 +1,6 @@
 import { supabase } from '@/utils/supabase';
-import { fetchFedExStatus } from '../../lib/fedex';
+import { fetchFedExStatus, fetchFedExExpDate } from '../../lib/fedex';
+import { DateTime } from 'luxon';
 
 export async function GET() {
   const { data, error } = await supabase
@@ -19,13 +20,20 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { tracking_number, carrier, sample_type, priority } = body;
 
-  let status = 'In Transit'; // default
+  let status = 'In Transit';
+  let expected_delivery: string | null = null;
 
   if (carrier === 'FedEx') {
     const fedexStatus = await fetchFedExStatus(tracking_number);
+    const fedexExpectedDelivery = await fetchFedExExpDate(tracking_number);
+    
     if (fedexStatus) status = fedexStatus;
+    if (fedexExpectedDelivery) {
+      // Convert the DateTime object to ISO string for database storage
+      expected_delivery = fedexExpectedDelivery.toISO();
+      console.log('✅ Expected delivery date:', DateTime.fromISO(expected_delivery).toLocaleString(DateTime.DATETIME_FULL));
+    }
   }
-
 
   // Server-side validation
   if (!tracking_number || tracking_number.trim().length < 6) {
@@ -42,15 +50,20 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Tracking number already exists' }, { status: 409 });
   }
 
-  const { data, error } = await supabase.from('shipments').insert([
-    {
-      tracking_number,
-      carrier,
-      status: 'In Transit',
-      sample_type,
-      priority,
-    },
-  ]);
+  const { data, error } = await supabase
+    .from('shipments')
+    .insert([
+      {
+        tracking_number,
+        carrier,
+        status,
+        sample_type,
+        priority,
+        expected_delivery_date: expected_delivery // Add this field
+      }
+    ])
+    .select()
+    .single();
 
   if (error) {
     console.error('❌ POST error:', error.message);

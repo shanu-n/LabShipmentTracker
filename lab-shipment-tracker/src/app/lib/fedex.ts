@@ -1,5 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { DateTime } from 'luxon';
 
 dotenv.config();
 
@@ -77,6 +78,48 @@ export async function fetchFedExStatus(trackingNumber: string): Promise<string |
     return status;
   } catch (err: any) {
     console.error(`❌ FedEx tracking failed for ${trackingNumber}:`, err?.response?.data || err);
+    return null;
+  }
+}
+
+// ...existing code until fetchFedExExpDate...
+
+export async function fetchFedExExpDate(trackingNumber: string): Promise<DateTime | null> {
+  const token = await getFedExAccessToken();
+
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+
+  const body = {
+    trackingInfo: [
+      {
+        trackingNumberInfo: {
+          trackingNumber,
+        },
+      },
+    ],
+    includeDetailedScans: true,
+  };
+
+  try {
+    const response = await axios.post(trackingUrl, body, { headers });
+    const data = response.data as any;
+
+    const result = data.output?.completeTrackResults?.[0]?.trackResults?.[0];
+    const estimatedDelivery = result?.estimatedDeliveryTimeWindow?.window?.ends;
+
+    if (!estimatedDelivery) {
+      console.log(`ℹ️ No delivery date available for ${trackingNumber}`);
+      return null;
+    }
+
+    const deliveryDate = DateTime.fromISO(estimatedDelivery);
+    console.log(`✅ FedEx Expected Delivery for ${trackingNumber}: ${deliveryDate.toLocaleString(DateTime.DATETIME_FULL)}`);
+    return deliveryDate;
+  } catch (err: any) {
+    console.error(`❌ FedEx delivery date fetch failed for ${trackingNumber}:`, err?.response?.data || err);
     return null;
   }
 }
