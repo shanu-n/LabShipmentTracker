@@ -1,4 +1,5 @@
 import { supabase } from '@/utils/supabase';
+import { fetchFedExStatus } from '../../lib/fedex';
 
 export async function GET() {
   const { data, error } = await supabase
@@ -17,6 +18,14 @@ export async function GET() {
 export async function POST(req: Request) {
   const body = await req.json();
   const { tracking_number, carrier, sample_type, priority } = body;
+
+  let status = 'In Transit'; // default
+
+  if (carrier === 'FedEx') {
+    const fedexStatus = await fetchFedExStatus(tracking_number);
+    if (fedexStatus) status = fedexStatus;
+  }
+
 
   // Server-side validation
   if (!tracking_number || tracking_number.trim().length < 6) {
