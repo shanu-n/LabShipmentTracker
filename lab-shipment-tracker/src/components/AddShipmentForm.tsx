@@ -17,6 +17,26 @@ export default function AddShipmentForm({ onAdd }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const getStatusColor = (status: string | null) => {
+    if (!status) return 'bg-red-600'; // Red for null/invalid tracking
+    
+    switch (status) {
+      case 'Delivered':
+        return 'bg-green-600';
+      case 'Delayed':
+        return 'bg-red-600';
+      case 'Out for Delivery':
+        return 'bg-blue-600';
+      default:
+        return 'bg-yellow-600';
+    }
+  };
+
+  const getStatusText = (status: string | null) => {
+    if (!status) return 'This tracking number does not exist';
+    return status;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (error) setError(null);
@@ -44,6 +64,13 @@ export default function AddShipmentForm({ onAdd }: Props) {
 
       if (!response.ok) {
         throw new Error(result.error || 'Failed to add shipment');
+      }
+
+      // Check if the tracking number exists (status is not null)
+      if (result.shipment && result.shipment.status === null) {
+        setError('This tracking number does not exist. Please verify the tracking number.');
+        // Don't reset the form, keep the entered data for correction
+        return;
       }
 
       setForm({

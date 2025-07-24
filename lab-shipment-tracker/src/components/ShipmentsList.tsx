@@ -7,7 +7,7 @@ type Shipment = {
   id: string;
   tracking_number: string;
   carrier: string;
-  status: string;
+  status: string | null;
   sample_type: string | null;
   priority: string | null;
   expected_delivery_date: string | null;
@@ -48,7 +48,9 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
     setTimeout(() => setSuccess(null), 3000);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string | null) => {
+    if (!status) return 'bg-red-600'; // Red for null/invalid tracking
+    
     switch (status) {
       case 'Delivered':
         return 'bg-green-600';
@@ -61,6 +63,11 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
     }
   };
 
+  const getStatusText = (status: string | null) => {
+    if (!status) return 'This tracking number does not exist';
+    return status;
+  };
+
   const formatDate = (iso: string | null) => {
     if (!iso) return '—';
   
@@ -68,8 +75,6 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
       .setZone('America/Los_Angeles') // 🌎 Convert to Pacific Time
       .toFormat("cccc, M/d/yy 'at' h:mm a"); // 🗓️ Exact format like FedEx
   };
-  
-  
 
   const PaginationControls = ({
     total,
@@ -158,33 +163,37 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
               <tr key={s.id} className="border-t text-gray-900">
                 <td className="p-1 border font-mono text-base">{s.tracking_number}</td>
                 <td className="p-1 border text-center">
-                  <span className={`px-3 py-1 rounded text-white text-sm ${getStatusColor(s.status)}`}>{s.status}</span>
+                  <span className={`px-3 py-1 rounded text-white text-sm ${getStatusColor(s.status)}`}>
+                    {getStatusText(s.status)}
+                  </span>
                 </td>
-                <td className="px-3 py-1 border">{s.carrier}</td>
-                <td className="px-3 py-1 border">{s.sample_type || '—'}</td>
-                <td className="px-3 py-1 border">{s.priority || '—'}</td>
-                <td className="px-3 py-1 border">
+                <td className="px-3 py-1 border text-center">{s.carrier}</td>
+                <td className="px-3 py-1 border text-center">{s.sample_type || '—'}</td>
+                <td className="px-3 py-1 border text-center">{s.priority || '—'}</td>
+                <td className="px-3 py-1 border text-center">
                   {s.status === 'Delivered' && s.date_received
                     ? formatDate(s.date_received)
                     : formatDate(s.expected_delivery_date)}
                 </td>
-                <td className="px-3 py-1 border">{formatDate(s.date_received)}</td>
+                <td className="px-3 py-1 border text-center">{formatDate(s.date_received)}</td>
                 <td className="px-3 py-1 border">
-                  {s.date_received ? (
-                    <button
-                      disabled
-                      className="bg-green-600 text-white px-4 py-2 rounded cursor-not-allowed"
-                    >
-                      ✓ Received
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => markAsReceived(s.id)}
-                      className="bg-[#0059c2] text-white text-sm px-6 py-1 rounded hover:bg-[#0044a8]"
-                    >
-                      Mark as Received
-                    </button>
-                  )}
+                  <div className="flex justify-center">
+                    {s.date_received ? (
+                      <button
+                        disabled
+                        className="bg-green-600 text-white px-4 py-2 rounded cursor-not-allowed"
+                      >
+                        ✓ Received
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => markAsReceived(s.id)}
+                        className="bg-[#0059c2] text-white text-sm px-6 py-1 rounded hover:bg-[#0044a8]"
+                      >
+                        Mark as Received
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
