@@ -157,8 +157,13 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
                 <td className="px-3 py-1 border">{s.sample_type || '—'}</td>
                 <td className="px-3 py-1 border">{s.priority || '—'}</td>
                 <td className="px-3 py-1 border">
-                  {s.expected_delivery_date ? new Date(s.expected_delivery_date).toLocaleString() : '—'}
+                  {s.status === 'Delivered' && s.date_received
+                    ? new Date(s.date_received).toLocaleString()
+                    : s.expected_delivery_date
+                    ? new Date(s.expected_delivery_date).toLocaleString()
+                    : '—'}
                 </td>
+
                 <td className="px-3 py-1 border">
                   {s.date_received ? new Date(s.date_received).toLocaleString() : '—'}
                 </td>

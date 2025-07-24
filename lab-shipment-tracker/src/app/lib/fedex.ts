@@ -2,6 +2,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import { DateTime } from 'luxon';
 
+
 dotenv.config();
 
 let cachedToken: string | null = null;
@@ -108,15 +109,30 @@ export async function fetchFedExExpDate(trackingNumber: string): Promise<DateTim
     const data = response.data as any;
 
     const result = data.output?.completeTrackResults?.[0]?.trackResults?.[0];
+
+    const actualDeliveryObj = result?.dateAndTimes?.find(
+      (t: any) => t.type === 'ACTUAL_DELIVERY'
+    );
+
+    const actualDelivery = actualDeliveryObj?.dateTime;
     const estimatedDelivery = result?.estimatedDeliveryTimeWindow?.window?.ends;
 
-    if (!estimatedDelivery) {
-      console.log(`ℹ️ No delivery date available for ${trackingNumber}`);
+    const rawDate = actualDelivery ?? estimatedDelivery;
+
+    if (!rawDate) {
+      console.log(`ℹ️ No delivery or expected date for ${trackingNumber}`);
       return null;
     }
 
-    const deliveryDate = DateTime.fromISO(estimatedDelivery);
-    console.log(`✅ FedEx Expected Delivery for ${trackingNumber}: ${deliveryDate.toLocaleString(DateTime.DATETIME_FULL)}`);
+    // ✅ Force convert from UTC to America/Los_Angeles
+    const deliveryDate = DateTime.fromISO(rawDate, { zone: 'utc' }).setZone('America/Los_Angeles');
+
+    console.log(
+      `✅ Delivery for ${trackingNumber} (${actualDelivery ? 'Actual' : 'Expected'}): ${deliveryDate.toLocaleString(
+        DateTime.DATETIME_FULL
+      )}`
+    );
+
     return deliveryDate;
   } catch (err: any) {
     console.error(`❌ FedEx delivery date fetch failed for ${trackingNumber}:`, err?.response?.data || err);

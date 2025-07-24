@@ -24,14 +24,23 @@ export async function POST(req: Request) {
   let expected_delivery: string | null = null;
 
   if (carrier === 'FedEx') {
-    const fedexStatus = await fetchFedExStatus(tracking_number);
-    const fedexExpectedDelivery = await fetchFedExExpDate(tracking_number);
-    
-    if (fedexStatus) status = fedexStatus;
-    if (fedexExpectedDelivery) {
-      // Convert the DateTime object to ISO string for database storage
-      expected_delivery = fedexExpectedDelivery.toISO();
-      console.log('✅ Expected delivery date:', DateTime.fromISO(expected_delivery).toLocaleString(DateTime.DATETIME_FULL));
+    try {
+      const fedexStatus = await fetchFedExStatus(tracking_number);
+      const fedexExpectedDelivery = await fetchFedExExpDate(tracking_number);
+
+      if (fedexStatus) {
+        status = fedexStatus;
+      }
+
+      if (fedexExpectedDelivery && typeof fedexExpectedDelivery.toISO === 'function') {
+        // Convert to ISO string (length ~24) and truncate if needed
+        expected_delivery = fedexExpectedDelivery.toISO();
+        if (expected_delivery.length > 30) {
+          expected_delivery = expected_delivery.slice(0, 30); // truncate safely
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ FedEx fetch failed:', err.message);
     }
   }
 
@@ -59,7 +68,7 @@ export async function POST(req: Request) {
         status,
         sample_type,
         priority,
-        expected_delivery_date: expected_delivery // Add this field
+        expected_delivery_date: expected_delivery, // Will be ISO or null
       }
     ])
     .select()
