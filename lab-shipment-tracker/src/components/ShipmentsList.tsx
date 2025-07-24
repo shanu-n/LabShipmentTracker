@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import AddShipmentForm from './AddShipmentForm';
+import { DateTime } from 'luxon'; // ✅ Import Luxon
 
 type Shipment = {
   id: string;
@@ -44,11 +45,8 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
     });
     setSuccess('Shipment marked as received!');
     onMarkAsReceived();
-
-    // Auto-hide after 3 seconds
     setTimeout(() => setSuccess(null), 3000);
   };
-
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -63,14 +61,24 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
     }
   };
 
-  const PaginationControls = ({ 
-    total, 
-    currentPage, 
-    setPage 
-  }: { 
-    total: number; 
-    currentPage: number; 
-    setPage: (page: number) => void; 
+  const formatDate = (iso: string | null) => {
+    if (!iso) return '—';
+  
+    return DateTime.fromISO(iso, { zone: 'utc' }) // ⏰ Treat as UTC
+      .setZone('America/Los_Angeles') // 🌎 Convert to Pacific Time
+      .toFormat("cccc, M/d/yy 'at' h:mm a"); // 🗓️ Exact format like FedEx
+  };
+  
+  
+
+  const PaginationControls = ({
+    total,
+    currentPage,
+    setPage,
+  }: {
+    total: number;
+    currentPage: number;
+    setPage: (page: number) => void;
   }) => {
     const totalPages = Math.ceil(total / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -86,22 +94,22 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           <button
             onClick={() => setPage(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1 || !hasResults}
-            className={`px-3 py-1 rounded border transition-colors
-              ${currentPage === 1 || !hasResults
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+            className={`px-3 py-1 rounded border transition-colors ${
+              currentPage === 1 || !hasResults
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 : 'bg-blue-800 text-white hover:bg-blue-700'
-              }`}
+            }`}
           >
             Previous
           </button>
           <button
             onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
             disabled={currentPage === totalPages || !hasResults}
-            className={`px-3 py-1 rounded border transition-colors
-              ${currentPage === totalPages || !hasResults
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+            className={`px-3 py-1 rounded border transition-colors ${
+              currentPage === totalPages || !hasResults
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                 : 'bg-blue-800 text-white hover:bg-blue-700'
-              }`}
+            }`}
           >
             Next
           </button>
@@ -120,7 +128,6 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
         >
           {showReceived ? 'Hide Received Shipments' : 'Show Received Shipments'}
         </button>
-
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto border text-lg font-medium text-[#1c1c1e]">
@@ -158,15 +165,10 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
                 <td className="px-3 py-1 border">{s.priority || '—'}</td>
                 <td className="px-3 py-1 border">
                   {s.status === 'Delivered' && s.date_received
-                    ? new Date(s.date_received).toLocaleString()
-                    : s.expected_delivery_date
-                    ? new Date(s.expected_delivery_date).toLocaleString()
-                    : '—'}
+                    ? formatDate(s.date_received)
+                    : formatDate(s.expected_delivery_date)}
                 </td>
-
-                <td className="px-3 py-1 border">
-                  {s.date_received ? new Date(s.date_received).toLocaleString() : '—'}
-                </td>
+                <td className="px-3 py-1 border">{formatDate(s.date_received)}</td>
                 <td className="px-3 py-1 border">
                   {s.date_received ? (
                     <button
@@ -189,9 +191,9 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
           </tbody>
         </table>
       </div>
-      <PaginationControls 
-        total={activeShipments.length} 
-        currentPage={activePage} 
+      <PaginationControls
+        total={activeShipments.length}
+        currentPage={activePage}
         setPage={setActivePage}
       />
 
@@ -213,14 +215,14 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
                   <td className="p-1 border font-mono">{s.tracking_number}</td>
                   <td className="p-1 border">{s.carrier}</td>
                   <td className="p-1 border">{s.sample_type || '—'}</td>
-                  <td className="p-1 border">{new Date(s.date_received!).toLocaleString()}</td>
+                  <td className="p-1 border">{formatDate(s.date_received)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <PaginationControls 
-            total={receivedShipments.length} 
-            currentPage={receivedPage} 
+          <PaginationControls
+            total={receivedShipments.length}
+            currentPage={receivedPage}
             setPage={setReceivedPage}
           />
         </div>
