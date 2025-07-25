@@ -43,8 +43,8 @@ export default function AddShipmentForm({ onAdd }: Props) {
   };
 
   const handleSubmit = async () => {
-    if (form.tracking_number.trim().length < 6) {
-      setError('Tracking number must be at least 6 characters');
+    if (form.tracking_number.trim().length < 10) {
+      setError('Tracking number must be at least 10 characters');
       setSuccess(null); 
       return;
     }
@@ -151,7 +151,7 @@ export default function AddShipmentForm({ onAdd }: Props) {
           </select>
         </td>
         <td className="p-4 border text-center text-gray-400">—</td>
-        <td className="p-4 border text-center text-gray-400">—</td>
+        {/* <td className="p-4 border text-center text-gray-400">—</td> */}
         <td className="p-2 border text-center w-28">
           <button
             onClick={handleSubmit}

@@ -144,15 +144,15 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
               <th className="p-1 border">Shipment Type</th>
               <th className="p-1 border">Priority</th>
               <th className="p-1 border">Expected Delivery</th>
-              <th className="p-1 border">Date Received</th>
-              <th className="p-1 border">Action</th>
+              {/* <th className="p-1 border">Date Received</th> */}
+              <th className="px-20 border">Action</th>
             </tr>
           </thead>
           <tbody>
             <AddShipmentForm onAdd={onMarkAsReceived} />
             {success && (
               <tr>
-                <td colSpan={8}>
+                <td colSpan={7}>
                   <div className="my-2 mx-2 px-4 py-2 text-sm rounded bg-green-100 text-green-800 border border-green-300">
                     {success}
                   </div>
@@ -175,7 +175,7 @@ export default function ShipmentsList({ shipments, onMarkAsReceived }: Props) {
                     ? formatDate(s.date_received)
                     : formatDate(s.expected_delivery_date)}
                 </td>
-                <td className="px-3 py-1 border text-center">{formatDate(s.date_received)}</td>
+                {/* <td className="px-3 py-1 border text-center">{formatDate(s.date_received)}</td> */}
                 <td className="px-3 py-1 border">
                   <div className="flex justify-center">
                     {s.date_received ? (

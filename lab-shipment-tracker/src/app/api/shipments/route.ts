@@ -21,8 +21,8 @@ export async function POST(req: Request) {
   const { tracking_number, carrier, sample_type, priority } = body;
 
   // Server-side validation
-  if (!tracking_number || tracking_number.trim().length > 6) {
-    return Response.json({ error: 'Tracking number must be 6 characters' }, { status: 400 });
+  if (!tracking_number || tracking_number.trim().length < 10) {
+    return Response.json({ error: 'Tracking number must be at least 10 characters long' }, { status: 400 });
   }
 
   // Check for existing tracking number
