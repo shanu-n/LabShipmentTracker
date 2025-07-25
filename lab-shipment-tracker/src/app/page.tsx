@@ -31,8 +31,13 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchShipments();
+    fetchShipments(); // Fetch on page load
+
+    const interval = setInterval(fetchShipments, 1000 * 60 * 60); // Refresh every hour
+
+    return () => clearInterval(interval); // Cleanup
   }, []);
+
 
   return (
     <main className="min-h-screen bg-gray-100 py-10">

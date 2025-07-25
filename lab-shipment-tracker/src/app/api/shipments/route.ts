@@ -3,7 +3,7 @@ import { fetchFedExStatus, fetchFedExExpDate } from '../../lib/fedex';
 import { DateTime } from 'luxon';
 
 export async function GET() {
-  const { data, error } = await supabase
+  const { data: shipments, error } = await supabase
     .from('shipments')
     .select('*')
     .order('date_created', { ascending: false });
@@ -13,8 +13,51 @@ export async function GET() {
     return Response.json({ error: error.message }, { status: 500 });
   }
 
-  return Response.json({ shipments: data });
+  // Update FedEx statuses if needed
+  const updates = await Promise.all(
+    shipments.map(async (shipment) => {
+      if (
+        shipment.carrier === 'FedEx' &&
+        shipment.status !== 'Delivered'
+      ) {
+        try {
+          const newStatus = await fetchFedExStatus(shipment.tracking_number);
+          const newExpDate = await fetchFedExExpDate(shipment.tracking_number);
+
+          if (!newStatus) return null; // skip invalid
+
+          const updatedFields: Record<string, any> = {
+            status: newStatus,
+          };
+
+          if (newExpDate && typeof newExpDate.toISO === 'function') {
+            updatedFields.expected_delivery_date = newExpDate.toISO();
+          }
+
+          await supabase
+            .from('shipments')
+            .update(updatedFields)
+            .eq('id', shipment.id);
+        } catch (err) {
+          console.warn(`⚠️ Skipping FedEx update for ${shipment.tracking_number}:`, err.message);
+        }
+      }
+    })
+  );
+
+  // ✅ Re-fetch updated data after updates
+  const { data: updatedShipments, error: refetchError } = await supabase
+    .from('shipments')
+    .select('*')
+    .order('date_created', { ascending: false });
+
+  if (refetchError) {
+    return Response.json({ error: refetchError.message }, { status: 500 });
+  }
+
+  return Response.json({ shipments: updatedShipments });
 }
+
 
 export async function POST(req: Request) {
   const body = await req.json();
